@@ -1,1 +1,2 @@
-# Chat-server
+# Chat-server to cat with friends
+
