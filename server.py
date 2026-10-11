@@ -1,56 +1,54 @@
 import asyncio
-
 import websockets
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
+import sys
+
+sys.setrecursionlimit(10**5)
 
 address = "127.0.0.1"
 port = 12345
 clients = []
 nicknames = []
 
-async def getName(client):
-    if client in clients:
-        ind = clients.index(client)
-        name = nicknames[ind]
-        return name
-    return "DnE"
+def removeClient(client):
+    if client not in clients:
+        return None
+    index = clients.index(client)
+    clients.pop(index)
+    return nicknames.pop(index)
 
 async def broadcast(message, sender):
-    for client in clients:
+    for client in tuple(clients):
         try:
             await client.send(f'{sender}/.\\:{message}')
         except (ConnectionClosedOK, ConnectionClosedError):
-            name = await getName(client)
-            clients.remove(client)
-            nicknames.remove(name)
-            await client.send(f'{name}/.\\:{name} has left the chat')
-
+            name = removeClient(client)
+            if name is not None:
+                await broadcast(f'{name} has left the chat.', name)
 
 async def handler(websocket):
-    while True:
-        await websocket.send(".\\NICK")#send /.\NICK to tell cleint to send us the nickname 
-        name = await websocket.recv()#recive nickname
-
-        if name not in nicknames:#if name does not exist; continue func
-            break
-        
-        await websocket.send("/.\\NICK_EXISTS")# if name already exists; try again
-    nicknames.append(name)
-    clients.append(websocket)
-
-
     try:
-        async for Message in websocket: #get message
-            ind = clients.index(websocket)
-            name = nicknames[ind]
-            await broadcast(Message, name)#broadcast mesage to all
+        while True:
+                await websocket.send(".\\NICK")#send /.\NICK to tell cleint to send us the nickname 
+                name = await websocket.recv()#recive nickname
+
+                if name not in nicknames:#if name does not exist; continue func
+                    break
+                
+                await websocket.send("/.\\NICK_EXISTS")# if name already exists; try again
+                
+        nicknames.append(name)
+        clients.append(websocket)
+
+        async for message in websocket: #get message from websocket conection
+            await broadcast(message, name)#broadcast mesage to all
+    except (ConnectionClosedError,ConnectionClosedOK):
+        pass
     finally:
         if websocket in clients:
-            index = clients.index(websocket)
-            clients.remove(websocket)
-            nickname = nicknames[index]
-            nicknames.remove(nickname)
-            await broadcast(f"{name} has left the chat", name)
+            name = removeClient(websocket)   
+            if name is not None: 
+                await broadcast(f"{name} has left the chat", name)
      
 async def main():
     async with websockets.serve(handler, address, port):
