@@ -18,24 +18,28 @@ def removeClient(client):
     return nicknames.pop(index)
 
 async def broadcast(message, sender):
-    for client in tuple(clients):
-        try:
-            await client.send(f'{sender}/.\\:{message}')
-        except (ConnectionClosedOK, ConnectionClosedError):
+    results = await asyncio.gather(*(client.send(f'{sender}/.\\:{message}') for client in tuple(clients)),
+                                   return_exceptions=True
+                                   )
+
+    for client, result in zip(tuple(clients),results):
+        if isinstance(result, (ConnectionClosedOK,ConnectionClosedError)):
             name = removeClient(client)
             if name is not None:
-                await broadcast(f'{name} has left the chat.', name)
+                await broadcast(f'{name} has left the chat.', {name})
+            elif isinstance(result, BaseException):
+                raise result
 
 async def handler(websocket):
     try:
         while True:
-                await websocket.send(".\\NICK")#send /.\NICK to tell cleint to send us the nickname 
+                await websocket.send(".\\:NICK")#send /.\NICK to tell cleint to send us the nickname 
                 name = await websocket.recv()#recive nickname
 
                 if name not in nicknames:#if name does not exist; continue func
                     break
                 
-                await websocket.send("/.\\NICK_EXISTS")# if name already exists; try again
+                await websocket.send("/.\\:NICK_EXISTS")# if name already exists; try again
                 
         nicknames.append(name)
         clients.append(websocket)
