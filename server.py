@@ -19,7 +19,9 @@ def removeClient(client):
 
 async def broadcast(message, sender):
     results = await asyncio.gather(*(client.send(f'{sender}/.\\:{message}') for client in tuple(clients)),
-                                   return_exceptions=True
+                                   return_exceptions=True,
+                                   timeout=None,
+                                   cancel_on_error=False
                                    )
 
     for client, result in zip(tuple(clients),results):
