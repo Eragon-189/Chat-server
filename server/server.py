@@ -3,6 +3,7 @@ import websockets
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 import sys
 import datetime
+import traceback
 
 sys.setrecursionlimit(10**5)
 
@@ -62,17 +63,22 @@ async def handler(websocket):
             printLog(websocket, name, f'said {message}')
     except (ConnectionClosedError,ConnectionClosedOK):
         printLog(websocket, name, 'has disconected from chat normally')
-    except Exception as e:
+    except:
+        e = traceback.format_exc()
         printLog(websocket, name, f'disconected from chat with error: {e}')
     finally:
         if websocket in clients:
             name = removeClient(websocket)   
             if name is not None: 
                 await broadcast(f"{name} has left the chat", name)
-     
+    
 async def main():
-    async with websockets.serve(handler, address, port):
-        await asyncio.Future()
+    print("starting server.")
+    try:
+        async with websockets.serve(handler, address, port):
+            await asyncio.Future()
+    except:
+        printLog(None,None,f'Error starting:{traceback.format_exc()}')
 
 
 if __name__ == "__main__":
