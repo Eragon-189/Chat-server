@@ -58,10 +58,15 @@ function twoSplit(mess,split){
     return [header, body]
 }
 
-function display(){
-
+function display(sender, message){
+let container = document.createElement("div")
+let messageEle = document.createElement("p")
+let senderEl = document.createElement("p")
+senderEL.style = "font-weight:bold; font-size:15px;"
+messageEle.style = "font-size:20px;"
+container.style = "font-size:20px;"
 }
 
 function sendMessage(){
-    
+
 }
