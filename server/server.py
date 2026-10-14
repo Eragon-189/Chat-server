@@ -25,7 +25,7 @@ def removeClient(client):
 
 async def broadcast(message, sender):
         #run client.send in parrallel to save time
-    results = await asyncio.gather(*(client.send(f'{sender}/.\\:{message}') for client in tuple(clients)),
+    results = await asyncio.gather(*(client.send(f'{sender}/|.|\\:{message}') for client in tuple(clients)),
                                    return_exceptions=True,#return exeptions for prossesing later and dont cancel the rest
                                    timeout=None,
                                    cancel_on_error=False
@@ -45,13 +45,13 @@ async def broadcast(message, sender):
 async def handler(websocket):
     try:
         while True:
-                await websocket.send(".\\:NICK")#send /.\NICK to tell cleint to send us the nickname 
+                await websocket.send("NICK/|.|\\:")#send /.\NICK to tell cleint to send us the nickname 
                 name = await websocket.recv()#recive nickname
 
                 if name not in nicknames:#if name does not exist; continue func
                     break
                 printLog(websocket, name , f'has tried existing name {name}')
-                await websocket.send("/.\\:NICK_EXISTS")# if name already exists; try again
+                await websocket.send("NICK_EXISTS/|.|\\:")# if name already exists; try again
                 
         nicknames.append(name)
         clients.append(websocket)
