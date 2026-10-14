@@ -6,7 +6,6 @@ const websocket = new WebSocket(wsUri);
 
 websocket.addEventListener("open", () => {
     console.log(`Connected to: ${wsUri}`)
-
 })
 websocket.addEventListener("message", (mess) => {
     let [head, rawBody] = twoSplit(mess,"/.\\|")
@@ -23,19 +22,20 @@ websocket.addEventListener("message", (mess) => {
 function getNick(exists){
     let message = "Please enter a nickname."
     if(exists){  
-        message = "Please enter a diffrent nickname. That one is taken"
+        message = "Please enter a diffrent nickname. That one is taken."
     }
+
+     let innerHtml = `
+    <div id="mainPop" class="pop">${message}</div>
+    <input id="popInput" class="pop" type="text" placeholder="Your nickname here">
+    <button id="popSend" class="pop">Send</button>
+    `
 
     let backPop = document.createElement("div")
     backPop.className = "backPop"
     document.getElementById("body").append(backPop)
+    backPop.innerHTML = innerHtml
 
-    let innerHtml = `
-    <div id="mainPop" class="pop">${message}</div>
-    <input id="popInput" class="pop" type="text" placeholder="Your nickname here">
-    <button id="popSend" class="pop"></button>
-    `
-        mainPop.innerHTML = innerHtml
     let popSend = document.getElementById("popSend")
     popSend.style = ""
     let popInput = document.getElementById("popInput")
@@ -45,8 +45,9 @@ function getNick(exists){
         document.getElementsByClassName("backPop").remove()
         return val
     })
-    
+    websocket.send(nickname)
 }
+
 function twoSplit(mess,split){
     let messages = String(mess).split(split)
     let header = messages[0]
@@ -56,11 +57,11 @@ function twoSplit(mess,split){
     }
     return [header, body]
 }
-function twoSplit(mess,split){
-    let messages = str(mess).split(split)
-    let header = messages[0]
-    let body = ""
-    for(let i = 1; i < (messages.length);i++){
-        body = body + messages[i]
-    }
+
+function display(){
+
+}
+
+function sendMessage(){
+    
 }
