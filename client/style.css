@@ -4,16 +4,31 @@ body{
 }#chats{
     /* flex-grow: 1 ~ height:5%*/
     flex-grow: 1;
+    height: 30px;
     padding: 5px;
+    border-radius: 10px;
 }#chatBody{
     /*flex-grow: 16 ~ height:80%*/
     flex-grow: 16;
+    height: 50%;
     padding: 10px;
+    border:5px;
+    border-radius: 10px;
+    border-color:;
 }#message{
     /*flex-grow: 2 ~ height:10%*/
     flex-grow: 2;
     padding: 10px;
     display: flex;
+    flex-direction: row;
 }#messageInput{
-    
+    flex-grow: 7;
+    width: 85%;
+    padding:2.5%;
+    border-radius: 15px;
+}#send{
+    padding:2.5%;
+    flex-grow: 1;
+    width: 10%;
+    border-radius: 20px;
 }
