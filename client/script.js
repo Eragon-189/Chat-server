@@ -3,7 +3,7 @@ const chatBodyEl = document.getElementById("chatBody")
 const CSS = document.getElementById("CSS")
 const wsUri = "ws://127.0.0.1/:12345";
 const websocket = new WebSocket(wsUri);
-
+//test commit
 websocket.addEventListener("open", () => {
     console.log(`Connected to: ${wsUri}`)
 })
