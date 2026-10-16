@@ -1,0 +1,16 @@
+body{
+    display: flex;
+    flex-direction: column;
+}#chats{
+    /* flex-grow: 1 ~ height:5%*/
+    flex-grow: 1;
+    padding: 5px;
+}#chatBody{
+    flex-grow: 16;
+    padding: 10px;
+}#message{
+    flex-grow: 2;
+    padding: 10px;
+    display: flex;
+    
+}

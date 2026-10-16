@@ -1,14 +1,17 @@
 const messageEl = document.getElementById("messageInput")
 const chatBodyEl = document.getElementById("chatBody")
-const CSS = document.getElementById("CSS")
-const wsUri = "ws://127.0.0.1/:12345";
-const websocket = new WebSocket(wsUri);
+if (messageEl == null || chatBodyEl == null){
+    throw new Error(`messageEl:${messageEl}, chatBodyEl:${chatBodyEl}`);
+}
+const wsUri = "ws://https://psychic-space-engine-wvxgpj6vjvp6c9px5-12345.app.github.dev/";
+const port = ""
+const websocket = new WebSocket(`${wsUri}:${port}`);
 //test commit
 websocket.addEventListener("open", () => {
-    console.log(`Connected to: ${wsUri}`)
+    console.log(`Connected to: ${wsUri}:${port}`)
 })
 websocket.addEventListener("message", (mess) => {
-    let [head, rawBody] = twoSplit(mess,"/.\\|")
+    let [head, rawBody] = twoSplit(mess.data,"/.\\|")
     if (head == "NICK"){
         getNick(false)
         return;
@@ -32,41 +35,68 @@ function getNick(exists){
     `
 
     let backPop = document.createElement("div")
-    backPop.className = "backPop"
-    document.getElementById("body").append(backPop)
+    backPop.id = "backPop"
+    document.body.append(backPop)
     backPop.innerHTML = innerHtml
 
     let popSend = document.getElementById("popSend")
     popSend.style = ""
     let popInput = document.getElementById("popInput")
     popInput.style = ""
-    let nickname = popSend.addEventListener("click", () => {
+    popSend.addEventListener("click", () => {
         let val = document.getElementById("popInput").value
-        document.getElementsByClassName("backPop").remove()
-        return val
+        if (websocket.readyState == websocket.OPEN){
+            document.getElementById("backPop").remove()
+            websocket.send(val)
+        }else if (websocket.readyState == websocket.CLOSED) {
+            document.getElementById("backPop").remove()
+            alert("websocket closed. Please reload.")
+            throw new Error(`Connection closed`);
+        } else {
+            document.getElementById("backPop").remove()
+            alert("websocket state error. Please reload.")
+            throw new Error(`State:${websocket.readyState}`);
+        }
     })
-    websocket.send(nickname)
+    
 }
 
 function twoSplit(mess,split){
     let messages = String(mess).split(split)
     let header = messages[0]
-    let body = ""
-    for(let i = 1; i < (messages.length);i++){
-        body = body + messages[i]
+    let body = messages[1]
+    if (body == undefined){
+        body = ""
+    }
+    for(let i = 2; i < (messages.length);i++){
+        body = `${body}${split}${messages[i]}`
     }
     return [header, body]
 }
 
 function display(sender, message){
-let container = document.createElement("div")
-let messageEle = document.createElement("p")
-let senderEl = document.createElement("p")
-senderEL.style = "font-weight:bold; font-size:15px;"
-messageEle.style = "font-size:20px;"
-container.style = "font-size:20px;"
+    let container = document.createElement("div")
+    let messageEle = document.createElement("p")
+    let senderEl = document.createElement("p")
+    senderEl.style = "font-weight:bold; font-size:15px;"
+    senderEl.textContent = sender
+    messageEle.style = "font-size:30px; border-radius: 10px"
+    messageEle.textContent = message
+    container.style = "font-size:15px; border-radius: 5px" 
+    
+    container.append(senderEl)
+    container.append(messageEle)
+    chatBodyEl.append(container)
 }
 
 function sendMessage(){
-
+    if (websocket.readyState == websocket.OPEN){
+        websocket.send(messageEl.value)
+    }else if (websocket.readyState == websocket.CLOSED) {
+        alert("websocket closed. Please reload.")  
+        throw new Error(`Connection closed`);
+    } else {
+        alert("websocket state error. Please reload.")
+        throw new Error(`State:${websocket.readyState}`);
+    }
 }
