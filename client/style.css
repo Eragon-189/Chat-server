@@ -1,0 +1,75 @@
+:root{
+    --borderColor: #303030;
+    --inClickSpace: #202020;
+    --bgColor: #101010;
+    --textColor: #808080;
+}
+body{
+    height: 99vh;
+    background-color: var(--bgColor);
+    display: flex;
+    flex-direction: column;
+}
+/*
+#chats{
+    height: 30px;
+    padding: 5px;
+    border: solid;
+    border-width: 5px;
+    border-color: var(--borderColor);
+    background-color: var(--bgColor);
+    color: var(--textColor);
+    border-radius: 10px;
+}
+*/
+#chatBody{
+    flex-grow: 1;
+    min-height: 0;
+    padding: 10px;
+    border: solid;
+    border-width: 5px;
+    border-radius: 10px;
+    border-color: var(--borderColor);
+    background-color: var(--bgColor);
+    color: var(--textColor)
+}#message{
+    padding: 10px;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: row;
+    border: solid;
+    border-width: 5px;
+    border-radius: 15px;
+    align-items: center;
+    border-color: var(--borderColor);
+    background-color: var(--bgColor);
+    color: var(--textColor);
+}#messageInput{
+    height: 40px;
+    flex-grow: 150;
+    padding:5px;
+    border: solid;
+    border-width: 5px;
+    border-radius: 15px;
+    border-color: var(--borderColor);
+    background-color: var(--bgColor);
+    color: var(--textColor)
+}#send{
+    height: 60px;
+    padding:5px;
+    margin-left: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-grow: 1;
+    width: 100px; 
+    border-radius: 20px;
+    border: solid;
+    border-width: 5px;
+    border-color: var(--borderColor);
+    background-color: var(--bgColor);
+    color: var(--textColor)
+}.messages{
+    color: var(--textColor)
+}.message:hover{
+    background-color: var(--inClickSpace);
+}
