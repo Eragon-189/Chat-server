@@ -80,8 +80,10 @@ function display(sender, message){
     let senderEl = document.createElement("p")
     senderEl.style = "font-weight:bold; font-size:15px;"
     senderEl.textContent = sender
+    senderEl.className = "messages"
     messageEle.style = "font-size:30px; border-radius: 10px"
     messageEle.textContent = message
+    messageEle.className = "messages"
     container.style = "font-size:15px; border-radius: 5px" 
     
     container.append(senderEl)
