@@ -1,9 +1,10 @@
 const messageEl = document.getElementById("messageInput")
 const chatBodyEl = document.getElementById("chatBody")
+const butt = document.getElementById("send")
 if (messageEl == null || chatBodyEl == null){
     throw new Error(`messageEl:${messageEl}, chatBodyEl:${chatBodyEl}`);
 }
-const wsUri = "ws://https://psychic-space-engine-wvxgpj6vjvp6c9px5-12345.app.github.dev/";
+const wsUri = "ws://127.0.0.0";
 const port = ""
 const websocket = new WebSocket(`${wsUri}:${port}`);
 //test commit
@@ -21,6 +22,9 @@ websocket.addEventListener("message", (mess) => {
     }
     let [sender, message] = twoSplit(rawBody,"/.\\:")
     display(sender,message)
+})
+butt.addEventListener("click", ()=>{
+    sendMessage()
 })
 function getNick(exists){
     let message = "Please enter a nickname."
@@ -78,13 +82,13 @@ function display(sender, message){
     let container = document.createElement("div")
     let messageEle = document.createElement("p")
     let senderEl = document.createElement("p")
-    senderEl.style = "font-weight:bold; font-size:15px;"
+    senderEl.style = "font-weight:bold; font-size:15px; width:30px"
     senderEl.textContent = sender
     senderEl.className = "messages"
     messageEle.style = "font-size:30px; border-radius: 10px"
     messageEle.textContent = message
     messageEle.className = "messages"
-    container.style = "font-size:15px; border-radius: 5px" 
+    container.style = "width:50px; font-size:15px; border-radius: 5px; display:flex; flex-direction: column;" 
     
     container.append(senderEl)
     container.append(messageEle)
@@ -95,7 +99,7 @@ function sendMessage(){
     if (websocket.readyState == websocket.OPEN){
         websocket.send(messageEl.value)
     }else if (websocket.readyState == websocket.CLOSED) {
-        alert("websocket closed. Please reload.")  
+        alert("websocket closedease reload.")  
         throw new Error(`Connection closed`);
     } else {
         alert("websocket state error. Please reload.")

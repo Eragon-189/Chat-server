@@ -24,6 +24,7 @@ body{
 */
 #chatBody{
     flex-grow: 1;
+    overflow:scroll;
     min-height: 0;
     padding: 10px;
     border: solid;
@@ -32,7 +33,12 @@ body{
     border-color: var(--borderColor);
     background-color: var(--bgColor);
     color: var(--textColor)
-}#message{
+}
+#message{
+    overflow:scroll;
+    width: 100vw;
+    height: fit-content;
+    min-height: 60px;
     padding: 10px;
     margin-bottom: 0;
     display: flex;
@@ -44,8 +50,10 @@ body{
     border-color: var(--borderColor);
     background-color: var(--bgColor);
     color: var(--textColor);
-}#messageInput{
-    height: 40px;
+}
+#messageInput{
+    text-wrap: wrap;
+    height: fit-content;
     flex-grow: 150;
     padding:5px;
     border: solid;
@@ -54,13 +62,14 @@ body{
     border-color: var(--borderColor);
     background-color: var(--bgColor);
     color: var(--textColor)
-}#send{
+}
+#send{
     height: 60px;
     padding:5px;
     margin-left: 10px;
     margin-top: 0;
     margin-bottom: 0;
-    flex-grow: 1;
+    flex-shrink: 2;
     width: 100px; 
     border-radius: 20px;
     border: solid;
@@ -68,8 +77,10 @@ body{
     border-color: var(--borderColor);
     background-color: var(--bgColor);
     color: var(--textColor)
-}.messages{
+}
+.messages{
     color: var(--textColor)
-}.message:hover{
+}
+.message:hover{
     background-color: var(--inClickSpace);
 }

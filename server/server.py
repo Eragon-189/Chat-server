@@ -27,7 +27,6 @@ async def broadcast(message, sender):
         #run client.send in parrallel to save time
     results = await asyncio.gather(*(client.send(f'{sender}/|.|\\:{message}') for client in tuple(clients)),
                                    return_exceptions=True,#return exeptions for prossesing later and dont cancel the rest
-                                   timeout=None,
                                    cancel_on_error=False
                                    )
 
