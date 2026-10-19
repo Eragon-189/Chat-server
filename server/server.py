@@ -8,12 +8,13 @@ import traceback
 sys.setrecursionlimit(10**5)
 
 address = "127.0.0.1"
-port = 12345
+port = 8080
 clients = []
 nicknames = []
 def printLog(client, name, acction):
     date = datetime.datetime.now()
-    dateWoMs = str(date).removesuffix(f'.{date.strftime('%f')}')#remove milliseconds from datetime  
+    ms = date.strftime('%f')
+    dateWoMs = str(date).removesuffix(f'.{ms}')#remove milliseconds from datetime  
     print(f'{dateWoMs}  {client}:{name} {acction}.')#log 
 
 def removeClient(client):
@@ -25,9 +26,8 @@ def removeClient(client):
 
 async def broadcast(message, sender):
         #run client.send in parrallel to save time
-    results = await asyncio.gather(*(client.send(f'{sender}/|.|\\:{message}') for client in tuple(clients)),
+    results = await asyncio.gather(*(client.send(f'MESSAGE/|.|\\|{sender}/|.|\\:{message}') for client in tuple(clients)),
                                    return_exceptions=True,#return exeptions for prossesing later and dont cancel the rest
-                                   cancel_on_error=False
                                    )
 
     for client, result in zip(tuple(clients),results):#deal with errors
@@ -37,21 +37,26 @@ async def broadcast(message, sender):
             if name is not None:
                 await broadcast(f'{name} has left the chat.', {name})
                 printLog(client, name, f'has disconected from chat')
-            elif isinstance(result, BaseException):
+        elif isinstance(result, BaseException):
                     #if any other error remove them and print error to log
-                removeClient(client)
-                printLog(client, name, f"has left due to error {result}")
+            removeClient(client)
+            printLog(client, name, f"has left due to error {result}")
 async def handler(websocket):
     try:
         while True:
-                await websocket.send("NICK/|.|\\:")#send /.\NICK to tell cleint to send us the nickname 
-                name = await websocket.recv()#recive nickname
+                try:
+                    await websocket.send("NICK/|.|\\:")#send /.\NICK to tell cleint to send us the nickname 
+                    name = await websocket.recv()#recive nickname
 
-                if name not in nicknames:#if name does not exist; continue func
-                    break
-                printLog(websocket, name , f'has tried existing name {name}')
-                await websocket.send("NICK_EXISTS/|.|\\:")# if name already exists; try again
-                
+                    if name not in nicknames:#if name does not exist; continue func
+                        break
+                    printLog(websocket, name , f'has tried existing name {name}')
+                    await websocket.send("NICK_EXISTS/|.|\\:")# if name already exists; try again
+                except (ConnectionClosedError,ConnectionClosedOK):
+                    printLog(websocket, name, 'has disconected from chat normally')
+                except:
+                    printLog(websocket, name, f'disconected from chat with error: {traceback.format_exc()}')
+
         nicknames.append(name)
         clients.append(websocket)
 
@@ -63,8 +68,7 @@ async def handler(websocket):
     except (ConnectionClosedError,ConnectionClosedOK):
         printLog(websocket, name, 'has disconected from chat normally')
     except:
-        e = traceback.format_exc()
-        printLog(websocket, name, f'disconected from chat with error: {e}')
+        printLog(websocket, name, f'disconected from chat with error: {traceback.format_exc()}')
     finally:
         if websocket in clients:
             name = removeClient(websocket)   
