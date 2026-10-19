@@ -1,65 +1,56 @@
 const messageEl = document.getElementById("messageInput")
 const chatBodyEl = document.getElementById("chatBody")
+const butt = document.getElementById("send")
 if (messageEl == null || chatBodyEl == null){
     throw new Error(`messageEl:${messageEl}, chatBodyEl:${chatBodyEl}`);
 }
-const wsUri = "ws://https://psychic-space-engine-wvxgpj6vjvp6c9px5-12345.app.github.dev/";
-const port = ""
-const websocket = new WebSocket(`${wsUri}:${port}`);
-//test commit
+const protocol = "wss://"
+const Uri = prompt("Enter URI/URL:")
+const port = ":8080"
+const websocket = new WebSocket(`${protocol}${Uri}${port}`);
+const yourNickname = ""
+
 websocket.addEventListener("open", () => {
-    console.log(`Connected to: ${wsUri}:${port}`)
+    console.log(`Connected to: ${protocol}${Uri}${port}`)
+    document.querySelector("title").textContent = "Chat-Conected"
 })
 websocket.addEventListener("message", (mess) => {
-    let [head, rawBody] = twoSplit(mess.data,"/.\\|")
+    let [head, rawBody] = twoSplit(mess.data,"/|.|\\|")
     if (head == "NICK"){
         getNick(false)
         return;
     }if (head == "NICK_EXISTS"){
         getNick(true)
         return;
+    }if (head == "MESSAGE"){
+        let [sender, message] = twoSplit(rawBody,"/|.|\\:")
+        display(sender,message)
+    }else{
+        alert('Encounterd an error. Please ty agin later.')
+        websocket.close()
     }
-    let [sender, message] = twoSplit(rawBody,"/.\\:")
-    display(sender,message)
+})
+butt.addEventListener("click", ()=>{
+    sendMessage()
 })
 function getNick(exists){
-    let message = "Please enter a nickname."
+    let message = "Please enter a nickname:"
     if(exists){  
-        message = "Please enter a diffrent nickname. That one is taken."
+        message = "Please enter a diffrent nickname. That one is taken:"
     }
-
-     let innerHtml = `
-    <div id="mainPop" class="pop">${message}</div>
-    <input id="popInput" class="pop" type="text" placeholder="Your nickname here">
-    <button id="popSend" class="pop">Send</button>
-    `
-
-    let backPop = document.createElement("div")
-    backPop.id = "backPop"
-    document.body.append(backPop)
-    backPop.innerHTML = innerHtml
-
-    let popSend = document.getElementById("popSend")
-    popSend.style = ""
-    let popInput = document.getElementById("popInput")
-    popInput.style = ""
-    popSend.addEventListener("click", () => {
-        let val = document.getElementById("popInput").value
-        if (websocket.readyState == websocket.OPEN){
-            document.getElementById("backPop").remove()
-            websocket.send(val)
-        }else if (websocket.readyState == websocket.CLOSED) {
-            document.getElementById("backPop").remove()
-            alert("websocket closed. Please reload.")
-            throw new Error(`Connection closed`);
-        } else {
-            document.getElementById("backPop").remove()
-            alert("websocket state error. Please reload.")
-            throw new Error(`State:${websocket.readyState}`);
-        }
-    })
-    
+    let val = prompt(message)
+    yourNickname = val
+    if (websocket.readyState == websocket.OPEN){
+        websocket.send(val)
+    }else if (websocket.readyState == websocket.CLOSED) {
+        alert("Websocket closed. Please reload.")
+        throw new Error(`Connection closed`);
+    } else {
+        alert("Websocket state error. Please reload.")
+        throw new Error(`State:${websocket.readyState}`);
+    }
 }
+    
 
 function twoSplit(mess,split){
     let messages = String(mess).split(split)
@@ -75,16 +66,22 @@ function twoSplit(mess,split){
 }
 
 function display(sender, message){
+    let color = "#101010"
+    if(sender = yourNickname){
+        sender = "You"
+        color = "#2525F0"
+    }
+    color = `background-color: ${color};`
     let container = document.createElement("div")
     let messageEle = document.createElement("p")
     let senderEl = document.createElement("p")
-    senderEl.style = "font-weight:bold; font-size:15px;"
+    senderEl.style = `font-weight:bold; font-size:15px; width:100%; ${color}`
     senderEl.textContent = sender
     senderEl.className = "messages"
     messageEle.style = "font-size:30px; border-radius: 10px"
     messageEle.textContent = message
     messageEle.className = "messages"
-    container.style = "font-size:15px; border-radius: 5px" 
+    container.style = "width:100%; font-size:15px; border-radius: 5px; display:flex; flex-direction: column;" 
     
     container.append(senderEl)
     container.append(messageEle)
@@ -93,12 +90,13 @@ function display(sender, message){
 
 function sendMessage(){
     if (websocket.readyState == websocket.OPEN){
-        websocket.send(messageEl.value)
+        websocket.send(messageEl.value);
+        messageEl.value = ""
     }else if (websocket.readyState == websocket.CLOSED) {
-        alert("websocket closed. Please reload.")  
+        alert("websocket closed reload.");
         throw new Error(`Connection closed`);
     } else {
-        alert("websocket state error. Please reload.")
+        alert("websocket state error. Please reload.");
         throw new Error(`State:${websocket.readyState}`);
     }
 }
