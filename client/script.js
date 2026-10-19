@@ -8,6 +8,7 @@ const protocol = "wss://"
 const Uri = prompt("Enter URI/URL:")
 const port = ":8080"
 const websocket = new WebSocket(`${protocol}${Uri}${port}`);
+const yourNickname = ""
 
 websocket.addEventListener("open", () => {
     console.log(`Connected to: ${protocol}${Uri}${port}`)
@@ -38,6 +39,7 @@ function getNick(exists){
         message = "Please enter a diffrent nickname. That one is taken:"
     }
     let val = prompt(message)
+    yourNickname = val
     if (websocket.readyState == websocket.OPEN){
         websocket.send(val)
     }else if (websocket.readyState == websocket.CLOSED) {
@@ -64,10 +66,16 @@ function twoSplit(mess,split){
 }
 
 function display(sender, message){
+    let color = "#101010"
+    if(sender = yourNickname){
+        sender = "You"
+        color = "#2525F0"
+    }
+    color = `background-color: ${color};`
     let container = document.createElement("div")
     let messageEle = document.createElement("p")
     let senderEl = document.createElement("p")
-    senderEl.style = "font-weight:bold; font-size:15px; width:100%"
+    senderEl.style = `font-weight:bold; font-size:15px; width:100%; ${color}`
     senderEl.textContent = sender
     senderEl.className = "messages"
     messageEle.style = "font-size:30px; border-radius: 10px"
