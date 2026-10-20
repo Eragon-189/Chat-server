@@ -7,7 +7,7 @@ import traceback
 
 sys.setrecursionlimit(10**5)
 
-address = "127.0.0.1"
+address = "0.0.0.0"
 port = 8080
 clients = []
 nicknames = []
@@ -35,7 +35,7 @@ async def broadcast(message, sender):
                 #if disconected remove them and broadcast message
             name = removeClient(client)
             if name is not None:
-                await broadcast(f'{name} has left the chat.', {name})
+                await broadcast(f'{name} has left the chat.', name )
                 printLog(client, name, f'has disconected from chat')
         elif isinstance(result, BaseException):
                     #if any other error remove them and print error to log
@@ -45,17 +45,19 @@ async def handler(websocket):
     try:
         while True:
                 try:
-                    await websocket.send("NICK/|.|\\:")#send /.\NICK to tell cleint to send us the nickname 
+                    await websocket.send("NICK/|.|\\|")#send /.\NICK to tell cleint to send us the nickname 
                     name = await websocket.recv()#recive nickname
 
                     if name not in nicknames:#if name does not exist; continue func
                         break
                     printLog(websocket, name , f'has tried existing name {name}')
-                    await websocket.send("NICK_EXISTS/|.|\\:")# if name already exists; try again
+                    await websocket.send("NICK_EXISTS/|.|\\|")# if name already exists; try again
                 except (ConnectionClosedError,ConnectionClosedOK):
                     printLog(websocket, name, 'has disconected from chat normally')
+                    sys.exit()
                 except:
                     printLog(websocket, name, f'disconected from chat with error: {traceback.format_exc()}')
+                    sys.exit()
 
         nicknames.append(name)
         clients.append(websocket)
