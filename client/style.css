@@ -10,6 +10,7 @@
   --accent: #058080;
   --accent-strong: #2d2d67;
   --shadow: #00000064;
+  --messageBorderColor: #2b2b3d;
 }
 
 * {
@@ -124,6 +125,10 @@ body {
 
 .messages {
   color: var(--text-soft);
+  border: var(--messageBorderColor);
+  border-radius: 20px;
+  border-width: 5px;
+  border-style: solid;
 }
 
 #chatBody > div {
