@@ -4,13 +4,27 @@ from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 import sys
 import datetime
 import traceback
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).parent / ".env")
 
 sys.setrecursionlimit(10**5)
 
-address = "0.0.0.0"
-port = 8080
+
+chatName = os.getenv("CHAT_NAME", "MAIN")
+address = os.getenv("HOST","0.0.0.0")
+port = int(os.getenv("PORT","8080"))
+API_KEY = os.getenv("API")
+API_PROVIDER = os.getenv("APIPRO")
+APIprovider =  API_PROVIDER.lower()
+               
+hasApi = False
+if not(API_KEY == "" or API_KEY == None):
+    hasApi = True
 clients = []
 nicknames = []
+
 def printLog(client, name, acction):
     date = datetime.datetime.now()
     ms = date.strftime('%f')
@@ -25,7 +39,8 @@ def removeClient(client):
     return nicknames.pop(index)#and nickname wile returning nickname
 
 async def broadcast(message, sender):
-        #run client.send in parrallel to save time
+    #run client.send in parrallel to save time
+    name=""
     results = await asyncio.gather(*(client.send(f'MESSAGE/|.|\\|{sender}/|.|\\:{message}') for client in tuple(clients)),
                                    return_exceptions=True,#return exeptions for prossesing later and dont cancel the rest
                                    )
@@ -45,27 +60,37 @@ async def handler(websocket):
     try:
         while True:
                 try:
-                    await websocket.send("NICK/|.|\\|")#send /.\NICK to tell cleint to send us the nickname 
+                    await websocket.send("SYS/|.|\\|NICK")#send /.\NICK to tell cleint to send us the nickname 
                     name = await websocket.recv()#recive nickname
 
                     if name not in nicknames:#if name does not exist; continue func
                         break
                     printLog(websocket, name , f'has tried existing name {name}')
-                    await websocket.send("NICK_EXISTS/|.|\\|")# if name already exists; try again
+                    await websocket.send("SYS/|.|\\|NICK_EXISTS")# if name already exists; try again
+
                 except (ConnectionClosedError,ConnectionClosedOK):
                     printLog(websocket, name, 'has disconected from chat normally')
                     sys.exit()
                 except:
                     printLog(websocket, name, f'disconected from chat with error: {traceback.format_exc()}')
                     sys.exit()
-
+    
         nicknames.append(name)
         clients.append(websocket)
 
-        printLog(websocket, name, 'has sucsefuly joined chat')
+        await websocket.send(f"SYS/|.|\\|CHAT_NAME/|.|\\:{chatName}")
+        printLog(websocket, name, 'has successfullyfy joined chat')
 
         async for message in websocket: #get message from websocket conection
-            await broadcast(message, name)#broadcast mesage to all
+            header, rawBody = twoSplit(message, "/|.|\\|")
+            bodyHeader, body = twoSplit(rawBody, "/|.|\\:")
+            if bodyHeader != chatName or bodyHeader == None:
+                break
+            if header == "MESSAGE":
+                await broadcast(body, bodyHeader)#broadcast mesage to all
+            elif header == "API":
+                
+                    API_CLIENT(APIprovider,body)
             printLog(websocket, name, f'said {message}')
     except (ConnectionClosedError,ConnectionClosedOK):
         printLog(websocket, name, 'has disconected from chat normally')
@@ -83,8 +108,35 @@ async def main():
         async with websockets.serve(handler, address, port):
             await asyncio.Future()
     except:
-        printLog(None,None,f'Error starting:{traceback.format_exc()}')
+        printLog(f'Error starting:{traceback.format_exc()}')
 
+def twoSplit(text,split):
+    header, body = text.split(split, 1)
+    return [header, body]
+
+async def API_CLIENT(prompt, client):
+    if client.includes("gemini"):
+        geminiAPI(prompt, client)
+    elif client.includes("grok"):
+        pass
+    elif client.includes("openai"):
+        pass
+    elif client.includes("deepseek"):
+        pass
+    elif client.includes("anthropic"):
+        pass
+    else:
+        printLog(None,None,"Unsoported client")
+
+async def geminiAPI(prompt,model):
+    from google import genai
+    gemini = genai.Client(api_key=API_KEY)
+    responce = await asyncio.to_thread(
+        gemini.models.genarate_content,
+        model=model,
+        contents=prompt
+                                        )
+    return responce.text or ""
 
 if __name__ == "__main__":
     asyncio.run(main())
