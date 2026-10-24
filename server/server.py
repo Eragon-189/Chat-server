@@ -17,7 +17,7 @@ address = os.getenv("HOST","0.0.0.0")
 port = int(os.getenv("PORT","8080"))
 API_KEY = os.getenv("API")
 API_PROVIDER = os.getenv("APIPRO")
-APIprovider =  API_PROVIDER.lower()
+APIprovider =  str(API_PROVIDER).lower()
                
 hasApi = False
 if not(API_KEY == "" or API_KEY == None):
