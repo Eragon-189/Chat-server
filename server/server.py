@@ -7,18 +7,24 @@ import traceback
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(Path(__file__).parent / ".env")
-
+load_dotenv(Path(__file__).resolve().parent / ".env", override=True)
 sys.setrecursionlimit(10**5)
 
 
 chatName = os.getenv("CHAT_NAME", "MAIN")
-address = os.getenv("HOST","0.0.0.0")
-port = int(os.getenv("PORT","8080"))
-API_KEY = os.getenv("API")
-API_PROVIDER = os.getenv("APIPRO")
+address = os.getenv("HOST", "0.0.0.0")
+port = int(os.getenv("PORT", "8080"))
+API_KEY = os.getenv("API", "")
+API_PROVIDER = os.getenv("APIPRO", "")
 APIprovider =  str(API_PROVIDER).lower()
-               
+
+
+print(chatName)
+print(address)
+print(port)
+print(API_KEY)
+print(API_PROVIDER)
+
 hasApi = False
 if not(API_KEY == "" or API_KEY == None):
     hasApi = True
@@ -80,7 +86,7 @@ async def handler(websocket):
 
         await websocket.send(f"SYS/|.|\\|CHAT_NAME/|.|\\:{chatName}")
         await websocket.send(f"SYS/|.|\\|API/|.|\\:{hasApi}")
-        printLog(websocket, name, 'has successfullyfy joined chat')
+        printLog(websocket, name, 'has successfully joined chat')
 
         async for message in websocket: #get message from websocket conection
             header, rawBody = twoSplit(message, "/|.|\\|")
