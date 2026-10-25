@@ -2,7 +2,7 @@ const messageEl = document.getElementById("messageInput")
 const chatBodyEl = document.getElementById("chatBody")
 const butt = document.getElementById("send")
 const chatsBody = document.getElementById("chats")
-
+let hasAPI = false
 if (messageEl == null || chatBodyEl == null || butt == null || chatsBody == null){
     alert(`messageEl:${messageEl}, chatBodyEl:${chatBodyEl}, butt:${butt}, chatsBody:${chatsBody}`)
     throw new Error(`messageEl:${messageEl}, chatBodyEl:${chatBodyEl}, butt:${butt}, chatsBody:${chatsBody}`);
@@ -15,20 +15,19 @@ const websocket = new WebSocket(`${protocol}${Url}${port}`);
 let yourNickname = ""
 let API = ""
 let el;
+let curChatName = ""
 
 websocket.addEventListener("open", () => {
     console.log(`Connected to: ${protocol}${Url}${port}`)
     el = document.createElement("div")
     chatsBody.append(el)
     hasConnected = true;
-
     document.querySelector("title").textContent = "Chat-Conected"
 })
 websocket.addEventListener("message", (mess) => {
     let [head, rawBody] = twoSplit(mess.data,"/|.|\\|")
     let [sender, message] = twoSplit(rawBody,"/|.|\\:")
     if (head == "SYS"){
-
         if (sender == "NICK"){
         getNick(false)
         return;
@@ -38,9 +37,21 @@ websocket.addEventListener("message", (mess) => {
             return;
 
         }else if(sender == "CHAT_NAME"){
-                el.textContent = message
+            curChatName = message
+            el.textContent = message
+        }else if(sender == "API"){
+            let tempbool = hasAPI
+            if(String(body).toLowerCase() == "false"){
+                tempbool = false
+            }else if(String(body).toLowerCase() == "true"){
+                tempbool = true
+            }
+            hasAPI = tempbool
+            el = document.createElement("div")
+            el.textContent = "AI"
+            chatsBody.append(el)
         }
-    }else if (head == "MESSAGE"){
+    }else if (head == curChatName){
         display(sender,message)
     }else if (head == "API"){
         display(sender,message)
@@ -133,8 +144,13 @@ function display(sender, message){
     chatBodyEl.append(container)
 }
 
-function sendMessage(){
-    let messa = messageEl.value 
+function sendMessage(isAPI){
+    let messa = messageEl.value
+    if(isAPI){
+        messa = `MESSAGE/|.|\\|API/|.|\\:${messa}`
+    }else{
+        messa = `${curChatName}/|.|\\|${yourNickname}/|.|\\:${messa}`
+    }
     if(messa == "" || messa == null){
         return ;
     }
