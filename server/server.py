@@ -41,7 +41,7 @@ def removeClient(client):
 async def broadcast(message, sender):
     #run client.send in parrallel to save time
     name=""
-    results = await asyncio.gather(*(client.send(f'MESSAGE/|.|\\|{sender}/|.|\\:{message}') for client in tuple(clients)),
+    results = await asyncio.gather(*(client.send(f'{chatName}/|.|\\|{sender}/|.|\\:{message}') for client in tuple(clients)),
                                    return_exceptions=True,#return exeptions for prossesing later and dont cancel the rest
                                    )
 
@@ -79,18 +79,19 @@ async def handler(websocket):
         clients.append(websocket)
 
         await websocket.send(f"SYS/|.|\\|CHAT_NAME/|.|\\:{chatName}")
+        await websocket.send(f"SYS/|.|\\|API/|.|\\:{hasApi}")
         printLog(websocket, name, 'has successfullyfy joined chat')
 
         async for message in websocket: #get message from websocket conection
             header, rawBody = twoSplit(message, "/|.|\\|")
             bodyHeader, body = twoSplit(rawBody, "/|.|\\:")
-            if bodyHeader != chatName or bodyHeader == None:
+            if header == None or bodyHeader == None or body == None:
                 break
-            if header == "MESSAGE":
+            if header == chatName:
                 await broadcast(body, bodyHeader)#broadcast mesage to all
             elif header == "API":
-                
-                    API_CLIENT(APIprovider,body)
+                pass
+#                    API_CLIENT(APIprovider,body)
             printLog(websocket, name, f'said {message}')
     except (ConnectionClosedError,ConnectionClosedOK):
         printLog(websocket, name, 'has disconected from chat normally')
@@ -108,22 +109,22 @@ async def main():
         async with websockets.serve(handler, address, port):
             await asyncio.Future()
     except:
-        printLog(f'Error starting:{traceback.format_exc()}')
+        printLog(None, None, f'Error starting:{traceback.format_exc()}')
 
 def twoSplit(text,split):
     header, body = text.split(split, 1)
     return [header, body]
 
 async def API_CLIENT(prompt, client):
-    if client.includes("gemini"):
+    if "gemini" in client:
         geminiAPI(prompt, client)
-    elif client.includes("grok"):
+    elif "grok" in client:
         pass
-    elif client.includes("openai"):
+    elif "openai" in client:
         pass
-    elif client.includes("deepseek"):
+    elif "deepseek" in client:
         pass
-    elif client.includes("anthropic"):
+    elif "anthropic" in client:
         pass
     else:
         printLog(None,None,"Unsoported client")
