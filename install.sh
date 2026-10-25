@@ -10,7 +10,7 @@ curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo 
 sudo apt update -y
 sudo apt -y upgrade
 sudo apt install -y python3
-sudo apt install -y python-dotenv
+sudo apt install -y python3-dotenv
 sudo apt install -y python3-websockets
 cat .env << EOF
 HOST=0.0.0.0

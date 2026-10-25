@@ -80,7 +80,7 @@ async def handler(websocket):
 
         await websocket.send(f"SYS/|.|\\|CHAT_NAME/|.|\\:{chatName}")
         await websocket.send(f"SYS/|.|\\|API/|.|\\:{hasApi}")
-        printLog(websocket, name, 'has successfullyfy joined chat')
+        printLog(websocket, name, 'has successfully joined chat')
 
         async for message in websocket: #get message from websocket conection
             header, rawBody = twoSplit(message, "/|.|\\|")
