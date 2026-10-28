@@ -98,7 +98,7 @@ function getNick(exists){
     }
     yourNickname = val
     if (websocket.readyState == websocket.OPEN){
-        websocket.send(val)
+        websocket.send(`${val}`)
     }else if (websocket.readyState == websocket.CLOSED) {
         alert("Websocket closed. Please reload.")
         throw new Error(`Connection closed`);
