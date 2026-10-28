@@ -3,47 +3,49 @@ const chatBodyEl = document.getElementById("chatBody")
 const butt = document.getElementById("send")
 const chatsBody = document.getElementById("chats")
 let hasAPI = false
-if (messageEl == null || chatBodyEl == null || butt == null || chatsBody == null){
+if (messageEl === null || chatBodyEl === null || butt === null || chatsBody === null){
     alert(`messageEl:${messageEl}, chatBodyEl:${chatBodyEl}, butt:${butt}, chatsBody:${chatsBody}`)
     throw new Error(`messageEl:${messageEl}, chatBodyEl:${chatBodyEl}, butt:${butt}, chatsBody:${chatsBody}`);
 }
 let hasConnected = false
 const protocol = "wss://";
-let Url = `${URLparser(prompt("Enter Url/URL:"))}`
-let port = `${portParser(prompt("Enter port:"))}`
-const websocket = new WebSocket(`${protocol}${Url}${port}`);
+let Url = `${URLparser(prompt("Enter Url/URL (Will default to demo if left blank):"))}`
+if (Url == "" || Url == null){
+    Url = "chat.eragon189.hackclub.app"
+}
+const websocket = new WebSocket(`${protocol}${Url}`);
 let yourNickname = ""
 let API = ""
 let el;
 let curChatName = ""
 
 websocket.addEventListener("open", () => {
-    console.log(`Connected to: ${protocol}${Url}${port}`)
+    console.log(`Connected to: ${protocol}${Url}`)
     el = document.createElement("div")
     chatsBody.append(el)
     hasConnected = true;
-    document.querySelector("title").textContent = "Chat-Conected"
+    document.querySelector("title").textContnt = "Chat-Conected"
 })
-websocket.addEventListener("message", (mess) => {
+websocket.addEventListener("message", (mess)=> {
     let [head, rawBody] = twoSplit(mess.data,"/|.|\\|")
     let [sender, message] = twoSplit(rawBody,"/|.|\\:")
-    if (head == "SYS"){
-        if (sender == "NICK"){
+    if (head === "SYS"){
+        if (sender === "NICK"){
         getNick(false)
         return;
 
-        }else if (sender == "NICK_EXISTS"){
+        }else if (sender === "NICK_EXISTS"){
             getNick(true)
             return;
 
-        }else if(sender == "CHAT_NAME"){
+        }else if(sender === "CHAT_NAME"){
             curChatName = message
             el.textContent = message
-        }else if(sender == "API"){
+        }else if(sender === "API"){
             let tempbool = hasAPI
-            if(String(body).toLowerCase() == "false"){
+            if(String(body).toLowerCase() === "false"){
                 tempbool = false
-            }else if(String(body).toLowerCase() == "true"){
+            }else if(String(body).toLowerCase() === "true"){
                 tempbool = true
             }
             hasAPI = tempbool
@@ -51,10 +53,10 @@ websocket.addEventListener("message", (mess) => {
             el.textContent = "AI"
             chatsBody.append(el)
         }
-    }else if (head == curChatName){
-        display(sender,message)
-    }else if (head == "API"){
-        display(sender,message)
+    }else if (head === curChatName){
+        displayMessage(sender,message)
+    }else if (head === "API"){
+        displayMessage(sender,message)
     }else{
         alert('Unknown header. Please try agin later.')
         websocket.close()
@@ -64,7 +66,7 @@ butt.addEventListener("click", ()=>{
     sendMessage()
 })
 function URLparser(URL){
-    if (URL == null || URL == "" || !(URL.includes("."))){
+    if (URL === null || URL === "" || !(URL.includes("."))){
     alert("Please reload and enter a valid Url/URL.")
     throw new Error(`No nickname`);    
 }
@@ -79,27 +81,21 @@ function URLparser(URL){
     }
     return `${URL}`
 }
-function portParser(PORT){
-if(PORT == null || PORT == ""){
-    return ""
-}else{
-    return `:${PORT}`
-}
-}
+
 function getNick(exists){
     let message = "Please enter a nickname:"
     if(exists){  
         message = "Please enter a diffrent nickname. That one is taken:"
     }
     let val = prompt(message)
-    if(val == null || val == ""){
+    if(val === null || val === ""){
         alert("Did not enter a nickname. Reload and try again")
         throw new Error(`Did not enter a nickname`)
     }
     yourNickname = val
-    if (websocket.readyState == websocket.OPEN){
-        websocket.send(val)
-    }else if (websocket.readyState == websocket.CLOSED) {
+    if (websocket.readyState === websocket.OPEN){
+        websocket.send(`${val}`)
+    }else if (websocket.readyState === websocket.CLOSED) {
         alert("Websocket closed. Please reload.")
         throw new Error(`Connection closed`);
     } else {
@@ -113,7 +109,7 @@ function twoSplit(mess,split){
     let messages = String(mess).split(split)
     let header = messages[0]
     let body = messages[1]
-    if (body == undefined){
+    if (body === undefined){
         body = ""
     }
     for(let i = 2; i < (messages.length);i++){
@@ -122,9 +118,9 @@ function twoSplit(mess,split){
     return [header, body]
 }
 
-function display(sender, message){
+function displayMessage(sender, message){
     let color = "#606070"
-    if(sender == yourNickname){
+    if(sender === yourNickname){
         sender = "You"
         color = "#2525F0"
     }
@@ -151,20 +147,32 @@ function sendMessage(isAPI){
     }else{
         messa = `${curChatName}/|.|\\|${yourNickname}/|.|\\:${messa}`
     }
-    if(messa == "" || messa == null){
+    if(messa === "" || messa === null){
         return ;
     }
-    if (websocket.readyState == websocket.OPEN){
+    if (websocket.readyState === websocket.OPEN){
         websocket.send(messa);
         messageEl.value = ""
-    }else if(hasConnected == false){
-        alert("Never conected. Please reload and check URL and port.");
+    }else if(hasConnected === false){
+        alert("Never conected. Please reload and check URI.");
         throw new Error(`Never Conected to websocket`);
-    }else if (websocket.readyState == websocket.CLOSED) {
+    }else if (websocket.readyState === websocket.CLOSED) {
         alert("websocket closed reload.");
         throw new Error(`Connection closed`);
     }else {
         alert("websocket state error. Please reload.");
         throw new Error(`State:${websocket.readyState}`);
     }
+}
+
+function displayPopup(type){
+    let background = document.createElement("div")
+    background.style = "background-color: #40404060"
+    document.body.append(background)
+    if (type === "sign-in"){
+        let popupBody = document.createElement("div")
+        popupBody.style = "hi"
+    }
+     
+
 }

@@ -22,8 +22,7 @@ APIprovider =  str(API_PROVIDER).lower()
 print(chatName)
 print(address)
 print(port)
-print(API_KEY)
-print(API_PROVIDER)
+
 
 hasApi = False
 if not(API_KEY == "" or API_KEY == None):
@@ -64,22 +63,20 @@ async def broadcast(message, sender):
             printLog(client, name, f"has left due to error {result}")
 async def handler(websocket):
     try:
-        while True:
+        await websocket.send("SYS/|.|\\|NICK")#send /.\NICK to tell cleint to send us the nickname 
+        name = await websocket.recv()#recive nickname
+        while name not in nicknames:
                 try:
-                    await websocket.send("SYS/|.|\\|NICK")#send /.\NICK to tell cleint to send us the nickname 
-                    name = await websocket.recv()#recive nickname
 
-                    if name not in nicknames:#if name does not exist; continue func
-                        break
-                    printLog(websocket, name , f'has tried existing name {name}')
-                    await websocket.send("SYS/|.|\\|NICK_EXISTS")# if name already exists; try again
+                    printLog(websocket, None , f'has tried existing name {name}')
+                    name = await websocket.send("SYS/|.|\\|NICK_EXISTS")# if name already exists; try again
 
                 except (ConnectionClosedError,ConnectionClosedOK):
                     printLog(websocket, name, 'has disconected from chat normally')
-                    sys.exit()
+                    return
                 except:
                     printLog(websocket, name, f'disconected from chat with error: {traceback.format_exc()}')
-                    sys.exit()
+                    return
     
         nicknames.append(name)
         clients.append(websocket)
@@ -97,7 +94,7 @@ async def handler(websocket):
                 await broadcast(body, bodyHeader)#broadcast mesage to all
             elif header == "API":
                 pass
-#                    API_CLIENT(APIprovider,body)
+#               await API_CLIENT(APIprovider,body)
             printLog(websocket, name, f'said {message}')
     except (ConnectionClosedError,ConnectionClosedOK):
         printLog(websocket, name, 'has disconected from chat normally')
@@ -118,12 +115,14 @@ async def main():
         printLog(None, None, f'Error starting:{traceback.format_exc()}')
 
 def twoSplit(text,split):
+    if (split not in text):
+        return text
     header, body = text.split(split, 1)
     return [header, body]
 
 async def API_CLIENT(prompt, client):
     if "gemini" in client:
-        geminiAPI(prompt, client)
+        await geminiAPI(prompt, client)
     elif "grok" in client:
         pass
     elif "openai" in client:
